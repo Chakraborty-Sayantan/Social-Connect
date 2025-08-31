@@ -16,15 +16,26 @@ import { toast } from "sonner";
 interface PostCardProps {
   post: Post & {
     likes: { user_id: string }[];
-    comments: [{ count: number }];
+    comments: { id: string }[]; // <-- new shape
+    profiles: PostAuthor;
   };
   currentUser: User | null;
   isFollowingAuthor: boolean;
 }
 
+interface PostAuthor {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  bio: string | null;
+  role: string;
+}
+
 export default function PostCard({ post, currentUser, isFollowingAuthor }: PostCardProps) {
   const likesArray = post.likes || [];
-  const commentsCount = post.comments?.[0]?.count ?? 0;
+  const commentsCount = post.comments?.length ?? 0;
 
   const [likeCount, setLikeCount] = useState(likesArray.length);
   const [isLiked, setIsLiked] = useState(likesArray.some(like => like.user_id === currentUser?.id));

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
@@ -16,8 +16,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bell, Cog, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
 
 interface NavbarProps {
@@ -30,13 +30,13 @@ export default function Navbar({ user, profile }: NavbarProps) {
   const supabase = createClient();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // ✅ Wrap the function in useCallback
+  // Navigate to notifications and reset badge
   const handleNotificationsClick = useCallback(() => {
     setUnreadCount(0);
     router.push('/notifications');
   }, [router]);
 
-  // Effect to fetch the initial count of unread notifications
+  // Initial unread count
   useEffect(() => {
     if (!user) return;
     const fetchUnreadCount = async () => {
@@ -45,71 +45,82 @@ export default function Navbar({ user, profile }: NavbarProps) {
         .select('*', { count: 'exact', head: true })
         .eq('recipient_id', user.id)
         .eq('is_read', false);
-      if (count !== null) {
-        setUnreadCount(count);
-      }
+      if (count !== null) setUnreadCount(count);
     };
     fetchUnreadCount();
   }, [user, supabase]);
 
-  // Effect to listen for real-time notifications
+  // Realtime listener for new notifications
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel('realtime-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `recipient_id=eq.${user.id}`,
-        },
-        (payload) => {
-          toast.info(payload.new.message, {
-            icon: <Bell size={16} />,
-            action: {
-              label: 'View',
-              onClick: () => handleNotificationsClick(),
-            },
-          });
-          setUnreadCount((currentCount) => currentCount + 1);
-        }
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, supabase, router, handleNotificationsClick]);
+  if (!user) return;
+
+  const channel = supabase
+    .channel('realtime-notifications')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `recipient_id=eq.${user.id}`,
+      },
+      (payload) => {
+        toast.info(payload.new.message, {
+          icon: <Bell size={16} />,
+          action: { label: 'View', onClick: handleNotificationsClick },
+        });
+        setUnreadCount((c) => c + 1);
+      }
+    )
+    .subscribe();
+
+
+  return () => {
+    
+    supabase.removeChannel(channel);
+  };
+}, [user, supabase, router, handleNotificationsClick]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/login');
     router.refresh();
   };
-  
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center h-14">
-                <Link href="/feed" className="text-xl font-bold text-gray-800 hover:text-gray-900 transition-colors">
-                    SocialConnect
-                </Link>
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-14">
+          <Link
+            href="/feed"
+            className="text-xl font-bold text-gray-800 hover:text-gray-900 transition-colors"
+          >
+            SocialConnect
+          </Link>
 
-                {user && profile && (
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={handleNotificationsClick}>
-                            <div className="relative">
-                                <Bell className="h-5 w-5" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                                        {unreadCount > 9 ? '9+' : unreadCount}
-                                    </span>
-                                )}
-                            </div>
-                        </Button>
-                <DropdownMenu>
+          {user && profile && (
+            <div className="flex items-center gap-4">
+              {/* Bell Icon */}
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setUnreadCount(0);
+                    router.push('/notifications');
+                  }}
+                >
+                <div className="relative">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
+              </Button>
+
+              {/* Profile Dropdown */}
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar>
@@ -134,7 +145,7 @@ export default function Navbar({ user, profile }: NavbarProps) {
                     <Cog className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>
-                  
+
                   {profile.role === 'admin' && (
                     <>
                       <DropdownMenuSeparator />
@@ -152,10 +163,10 @@ export default function Navbar({ user, profile }: NavbarProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-                    </div>
-                )}
             </div>
+          )}
         </div>
+      </div>
     </nav>
   );
 }
