@@ -9,7 +9,6 @@ import Link from "next/link";
 import Image from 'next/image';
 import CommentSection from "@/components/core/CommentSection";
 
-
 export default async function PostDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
 
@@ -59,20 +58,25 @@ export default async function PostDetailPage({ params }: { params: { id: string 
               <Link href={`/${post.profiles?.username || ''}`} className="font-semibold hover:underline">
                 {post.profiles?.username || 'Unknown User'}
               </Link>
-              <time className="text-sm text-muted-foreground block">
-                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-              </time>
+              <div className="flex items-center gap-2">
+                <time className="text-sm text-muted-foreground">
+                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                </time>
+                {post.category && (
+                    <span className="text-sm text-blue-500 font-medium">#{post.category.charAt(0).toUpperCase() + post.category.slice(1)}</span>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <p className="whitespace-pre-wrap mb-4">{post.content}</p>
             {post.image_url && (
-              <div className="relative aspect-video mb-4">
+              <div className="relative aspect-video mb-4 rounded-lg border bg-muted">
                 <Image
                   src={post.image_url}
                   alt={`Image for post by ${post.profiles?.username || 'user'}`}
                   fill
-                  className="rounded-lg border object-cover"
+                  className="rounded-lg object-contain"
                 />
               </div>
             )}

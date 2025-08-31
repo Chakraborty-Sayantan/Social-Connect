@@ -8,38 +8,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Link from "next/link";
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from "../ui/button";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Trash2, Edit } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import FollowButton from "./FollowButton";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import EditPostModal from "./EditPostModal";
+import { useRouter } from "next/navigation";
 
 interface PostCardProps {
   post: Post & {
     likes: { user_id: string }[];
-    comments: { id: string }[]; // <-- new shape
-    profiles: PostAuthor;
+    comments: [{ count: number }];
+    category?: string;
   };
   currentUser: User | null;
   isFollowingAuthor: boolean;
 }
 
-interface PostAuthor {
-  id: string;
-  username: string;
-  avatar_url: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  bio: string | null;
-  role: string;
-}
-
 export default function PostCard({ post, currentUser, isFollowingAuthor }: PostCardProps) {
+  const router = useRouter();
   const likesArray = post.likes || [];
-  const commentsCount = post.comments?.length ?? 0;
+  const commentsCount = post.comments?.[0]?.count ?? 0;
 
   const [likeCount, setLikeCount] = useState(likesArray.length);
   const [isLiked, setIsLiked] = useState(likesArray.some(like => like.user_id === currentUser?.id));
   const [isLiking, setIsLiking] = useState(false);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
 
   const handleLike = async () => {
     if (!currentUser) {
@@ -59,18 +54,17 @@ export default function PostCard({ post, currentUser, isFollowingAuthor }: PostC
 
     try {
       const method = newIsLiked ? 'POST' : 'DELETE';
-      const response = await fetch(`/api/posts/${post.id}/like`, { 
+      const response = await fetch(`/api/posts/${post.id}/like`, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        // Add any necessary body data
-        body: method === 'POST' ? JSON.stringify({ 
-          postId: post.id, 
-          authorId: post.author_id 
+        body: method === 'POST' ? JSON.stringify({
+          postId: post.id,
+          authorId: post.author_id
         }) : undefined
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new Error(errorData.error || 'Failed to update like status');
@@ -86,66 +80,122 @@ export default function PostCard({ post, currentUser, isFollowingAuthor }: PostC
   };
 
   const handleCommentClick = () => {
-    // Navigate to post detail page where comments can be viewed/added
-    window.location.href = `/posts/${post.id}`;
+    router.push(`/posts/${post.id}`);
   };
-  
+
   const isOwnPost = currentUser?.id === post.author_id;
 
+  const handleDelete = async () => {
+    if (!isOwnPost) return;
+
+    if (confirm("Are you sure you want to delete this post?")) {
+      try {
+        const response = await fetch(`/api/posts/${post.id}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          toast.success("Post deleted successfully!");
+          router.refresh();
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to delete post');
+        }
+      } catch (error) {
+        toast.error("Failed to delete post. Please try again.");
+        console.error("Error deleting post:", error);
+      }
+    }
+  };
+
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between p-4">
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={post.profiles?.avatar_url || undefined} />
-            <AvatarFallback>{post.profiles?.username?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
-          </Avatar>
-          <div>
-            <Link href={`/${post.profiles?.username || ''}`} className="font-semibold hover:underline">
-              {post.profiles?.username || 'Unknown User'}
-            </Link>
-            <time className="text-sm text-muted-foreground block">
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-            </time>
+    <>
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarImage src={post.profiles?.avatar_url || undefined} />
+              <AvatarFallback>{post.profiles?.username?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <Link href={`/${post.profiles?.username || ''}`} className="font-semibold hover:underline">
+                {post.profiles?.username || 'Unknown User'}
+              </Link>
+              <div className="flex items-center gap-2">
+                 <time className="text-sm text-muted-foreground">
+                   {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                 </time>
+                 {post.category && (
+                    <span className="text-sm text-blue-500 font-medium">#{post.category.charAt(0).toUpperCase() + post.category.slice(1)}</span>
+                 )}
+              </div>
+            </div>
           </div>
-        </div>
-        {!isOwnPost && currentUser && (
-          <FollowButton targetUserId={post.author_id} initialIsFollowing={isFollowingAuthor} />
-        )}
-      </CardHeader>
-      <CardContent className="p-4 pt-0">
-        <p className="whitespace-pre-wrap">{post.content}</p>
-        {post.image_url && (
-          <div className="mt-4 relative aspect-video">
-            <Image 
-              src={post.image_url} 
-              alt={`Image for post by ${post.profiles?.username || 'user'}`}
-              fill
-              className="rounded-lg border object-cover"
-            />
+          <div className="flex items-center gap-2">
+            {!isOwnPost && currentUser && (
+              <FollowButton targetUserId={post.author_id} initialIsFollowing={isFollowingAuthor} />
+            )}
+            {isOwnPost && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreHorizontal size={20} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setEditModalOpen(true)}>
+                    <Edit size={16} className="mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDelete} className="text-red-500 focus:text-red-500">
+                    <Trash2 size={16} className="mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-start gap-4 p-4 pt-0">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleLike} 
-          className="flex items-center gap-2"
-          disabled={isLiking}
-        >
-          <Heart size={18} className={isLiked ? "fill-red-500 text-red-500" : ""} /> 
-          {likeCount}
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center gap-2"
-          onClick={handleCommentClick}
-        >
-          <MessageCircle size={18} /> {commentsCount}
-        </Button>
-      </CardFooter>
-    </Card>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          <p className="whitespace-pre-wrap">{post.content}</p>
+          {post.image_url && (
+            <div className="mt-4 relative aspect-video rounded-lg border bg-muted">
+              <Image
+                src={post.image_url}
+                alt={`Image for post by ${post.profiles?.username || 'user'}`}
+                fill
+                className="rounded-lg object-contain"
+              />
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="flex justify-start gap-4 p-4 pt-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLike}
+            className="flex items-center gap-2"
+            disabled={isLiking}
+          >
+            <Heart size={18} className={isLiked ? "fill-red-500 text-red-500" : ""} />
+            {likeCount}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={handleCommentClick}
+          >
+            <MessageCircle size={18} /> {commentsCount}
+          </Button>
+        </CardFooter>
+      </Card>
+      {isOwnPost && (
+        <EditPostModal
+          post={post}
+          isOpen={isEditModalOpen}
+          onClose={() => setEditModalOpen(false)}
+        />
+      )}
+    </>
   );
 }

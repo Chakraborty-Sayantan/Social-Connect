@@ -8,9 +8,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ImagePlus } from "lucide-react";
 import Image from "next/image";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 export default function CreatePost() {
   const [content, setContent] = useState('');
+  const [category, setCategory] = useState('general');
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,25 +41,28 @@ export default function CreatePost() {
     
     let imageUrl: string | null = null;
     
-    // 1. Handle File Upload if a file is selected
     if (file) {
       try {
-        const { data: signedUrlData, error: signedUrlError } = await fetch('/api/upload', {
+        const signedUrlResponse = await fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fileName: file.name, fileType: file.type }),
-        }).then(res => res.json());
+        });
 
-        if (signedUrlError) throw new Error(signedUrlError.message);
+        if (!signedUrlResponse.ok) {
+            const errorData = await signedUrlResponse.json();
+            throw new Error(errorData.error || 'Failed to get signed URL.');
+        }
 
+        const signedUrlData = await signedUrlResponse.json();
         const { token, path } = signedUrlData;
+
         const { error: uploadError } = await supabase.storage
           .from('post_images')
           .uploadToSignedUrl(path, token, file);
 
         if (uploadError) throw uploadError;
-
-        // Get the public URL of the uploaded image
+        
         const { data: { publicUrl } } = supabase.storage
           .from('post_images')
           .getPublicUrl(path);
@@ -71,7 +76,6 @@ export default function CreatePost() {
       }
     }
 
-    // 2. Insert Post into Database
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast.error("You must be logged in to post.");
@@ -81,12 +85,13 @@ export default function CreatePost() {
 
     const { error: insertError } = await supabase
       .from('posts')
-      .insert({ content, author_id: user.id, image_url: imageUrl });
+      .insert({ content, author_id: user.id, image_url: imageUrl, category });
 
     if (insertError) {
       toast.error(insertError.message);
     } else {
       setContent('');
+      setCategory('general');
       setFile(null);
       setPreviewUrl(null);
       if(fileInputRef.current) fileInputRef.current.value = "";
@@ -113,13 +118,24 @@ export default function CreatePost() {
               height={320}
               style={{ height: "auto", width: "auto", maxHeight: "20rem" }}
             />
-            
       )}
       <div className="flex justify-between items-center mt-2">
-        <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
-            <ImagePlus className="text-muted-foreground" />
-        </Button>
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/jpeg,image/png" className="hidden" />
+        <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+                <ImagePlus className="text-muted-foreground" />
+            </Button>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/jpeg,image/png" className="hidden" />
+            <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="announcement">Announcement</SelectItem>
+                    <SelectItem value="question">Question</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
         <Button onClick={handleCreatePost} disabled={loading}>
           {loading ? "Posting..." : "Post"}
         </Button>
