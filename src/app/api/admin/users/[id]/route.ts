@@ -1,24 +1,85 @@
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 async function isAdmin(supabase: SupabaseClient) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    return profile?.role === 'admin';
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  return profile?.role === "admin";
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string }}) {
-    const supabase = await createClient();
-    if (!await isAdmin(supabase)) {
-        return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
-    }
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient();
+  if (!(await isAdmin(supabase))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-    const { role } = await req.json();
+  const { id } = await params;
+  const { data: user, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-    const { error } = await supabase.from('profiles').update({ role }).eq('id', params.id);
-    if (error) return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
-    return NextResponse.json({ success: true });
+  return NextResponse.json(user);
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient();
+  if (!(await isAdmin(supabase))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const body = await req.json();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ ...body, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const supabase = await createClient();
+  if (!(await isAdmin(supabase))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq("id", Number(id));
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }
