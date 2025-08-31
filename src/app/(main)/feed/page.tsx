@@ -15,7 +15,7 @@ export default async function FeedPage() {
       *,
       profiles:author_id(*),
       likes(user_id),
-      comments(count)
+      comments!left(id)
     `)
     .order("created_at", { ascending: false })
     .limit(20);
