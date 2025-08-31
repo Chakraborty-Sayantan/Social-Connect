@@ -1,17 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createClient();
+  const { id } = await params;
 
   // people who **follow** this user
   const { data, error } = await supabase
     .from('follows')
     .select('follower:profiles!follower_id(*)')
-    .eq('following_id', params.id);
+    .eq('following_id', id);
 
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });

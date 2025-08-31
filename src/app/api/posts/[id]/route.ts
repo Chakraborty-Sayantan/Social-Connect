@@ -1,13 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Handles updating a specific post's content and category.
  * A user can only update their own post.
  */
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -16,6 +16,7 @@ export async function PATCH(
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
 
+    const { id } = await params;
     const { content, category } = await request.json();
 
     const { error } = await supabase
@@ -25,7 +26,7 @@ export async function PATCH(
             category,
             updated_at: new Date().toISOString()
         })
-        .eq('id', parseInt(params.id))
+        .eq('id', parseInt(id))
         .eq('author_id', user.id);
 
     if (error) {
@@ -40,8 +41,8 @@ export async function PATCH(
  * A user can only "delete" their own post.
  */
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -50,12 +51,13 @@ export async function DELETE(
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
 
+    const { id } = await params;
+
     const { error } = await supabase
         .from('posts')
         .update({ is_active: false, updated_at: new Date().toISOString() })
-        .eq('id', parseInt(params.id))
+        .eq('id', parseInt(id))
         .eq('author_id', user.id);
-
 
     if (error) {
         return new NextResponse(JSON.stringify({ error: error.message }), { status: 500 });

@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request, { params }: { params: { id: string }}) {
+export async function POST(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -11,7 +14,7 @@ export async function POST(req: Request, { params }: { params: { id: string }}) 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const targetUserId = params.id;
+    const { id: targetUserId } = await params;
 
     // Prevent self-follow
     if (user.id === targetUserId) {
@@ -50,7 +53,10 @@ export async function POST(req: Request, { params }: { params: { id: string }}) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string }}) {
+export async function DELETE(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -60,7 +66,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string }}
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const targetUserId = params.id;
+    const { id: targetUserId } = await params;
 
     // Remove follow relationship
     const { error: unfollowError } = await supabase
