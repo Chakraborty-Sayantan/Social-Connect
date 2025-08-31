@@ -1,7 +1,7 @@
 'use client'
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bell, Heart, MessageCircle, UserPlus  } from "lucide-react";
+import { Bell, Heart, MessageCircle, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { DetailedNotification } from "@/lib/types";
@@ -12,7 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
+import { formatDistanceToNow } from "date-fns";
 
 const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -32,24 +32,11 @@ interface NotificationListProps {
 
 export default function NotificationList({ notifications, loading, onOpenChange, onMarkAsRead }: NotificationListProps) {
     
-    const formatRelativeTime = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-        if (diffInSeconds < 60) return 'Just now';
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-        
-        return date.toLocaleDateString();
-    };
-
     return (
         <TooltipProvider>
             <div className="max-h-96 overflow-y-auto">
                 {loading && (
-                    <div className="space-y-3">
+                    <div className="space-y-3 p-2">
                         {Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="flex items-start gap-3">
                                 <Skeleton className="h-8 w-8 rounded-full" />
@@ -68,30 +55,30 @@ export default function NotificationList({ notifications, loading, onOpenChange,
                     </div>
                 )}
                 {!loading && (
-                    <ul className="space-y-1">
+                    <ul className="space-y-1 p-2">
                         {notifications.map(notif => (
-                            <li key={notif.id} className="flex items-center justify-between gap-2 p-2 rounded-md hover:bg-accent">
+                            <li key={notif.id} className="flex items-center justify-between gap-2 p-3 rounded-md hover:bg-accent">
                                 <div className="flex items-start gap-3 flex-1 min-w-0">
                                     <div className="flex-shrink-0 pt-1">
                                         {getNotificationIcon(notif.notification_type)}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start gap-2">
-                                            <Link href={`/${notif.sender_username}`} onClick={() => onOpenChange(false)}>
+                                            <Link href={`/${notif.sender_username}`} onClick={() => onOpenChange(false)} className="flex-shrink-0">
                                                 <Avatar className="h-6 w-6">
                                                         <AvatarImage src={notif.sender_avatar_url || undefined} />
                                                         <AvatarFallback>{notif.sender_username.charAt(0).toUpperCase()}</AvatarFallback>
                                                 </Avatar>
                                             </Link>
-                                            <div className="flex-1">
+                                            <div className="flex-1 min-w-0">
                                                 <p className="text-sm">
                                                     <Link href={`/${notif.sender_username}`} onClick={() => onOpenChange(false)} className="font-semibold hover:underline cursor-pointer">
                                                         {notif.sender_username}
                                                     </Link>{' '}
                                                     {notif.message.replace(notif.sender_username, '').trim()}
                                                 </p>
-                                                <time className="text-xs text-muted-foreground">
-                                                    {formatRelativeTime(notif.created_at)}
+                                                <time className="text-xs text-muted-foreground mt-0.5 block">
+                                                    {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
                                                 </time>
                                                 {notif.post_id && notif.post_content && (
                                                     <Link href={`/posts/${notif.post_id}`} onClick={() => onOpenChange(false)} className="cursor-pointer">

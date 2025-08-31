@@ -8,6 +8,9 @@ export interface Profile {
   avatar_url: string | null;
   bio: string | null;
   role: 'user' | 'admin';
+  website: string | null;
+  location: string | null;
+  visibility: string;
 }
 
 export interface Post {
@@ -33,7 +36,6 @@ export interface DetailedNotification {
     post_content: string | null;
 }
 
-// New type for the admin dashboard posts table
 export type AdminPost = {
     id: number;
     created_at: string;
@@ -49,4 +51,3 @@ export interface AuthenticatedPageProps {
   user: User;
   profile: Profile;
 }
-

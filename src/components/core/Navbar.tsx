@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { User } from '@supabase/supabase-js';
 import { Profile, DetailedNotification } from '@/lib/types';
 import Link from 'next/link';
@@ -129,9 +130,17 @@ export default function Navbar({ user, profile }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b shadow-sm">
         <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center h-14">
-                <Link href="/feed" className="text-xl font-bold">
-                    SocialConnect
+            <div className="flex justify-between items-center h-16">
+                <Link href="/feed" className="flex items-center gap-2">
+                    <Image 
+                        src="/logo.jpeg"
+                        alt="SocialConnect Logo"
+                        width={30}
+                        height={30}
+                        className="rounded-full object-cover"
+                        priority
+                    />
+                    <span className="text-xl font-bold">Social Connect</span>
                 </Link>
 
                 {user && profile && (
@@ -139,7 +148,7 @@ export default function Navbar({ user, profile }: NavbarProps) {
                         <ThemeToggle />
                         <Popover open={isPopoverOpen} onOpenChange={setPopoverOpen}>
                             <PopoverTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={() => unreadCount > 0 && handleMarkAllAsRead()}>
+                                <Button variant="ghost" size="icon" >
                                     <div className="relative">
                                         <Bell className="h-5 w-5" />
                                         {unreadCount > 0 && (

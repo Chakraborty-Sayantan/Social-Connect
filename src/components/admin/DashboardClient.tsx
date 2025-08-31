@@ -6,7 +6,7 @@ import StatsCard from "./StatsCard";
 import { UsersChart } from "./UsersChart";
 import { PostsChart } from "./PostsChart";
 import { Skeleton } from "../ui/skeleton";
-import { Users, FileText, Activity, UserPlus } from "lucide-react";
+import { Users, FileText, Activity, UserPlus, TrendingUp } from "lucide-react";
 
 interface DailyData {
     day: string;
@@ -16,6 +16,7 @@ interface AdminStats {
     total_users: number;
     total_posts: number;
     active_today: number;
+    new_users_today: number;
     new_users_week: number;
     new_posts_week: number;
     daily_signups: DailyData[];
@@ -64,14 +65,14 @@ export default function DashboardClient() {
             <div className="break-inside-avoid mb-4">
                 <StatsCard title="Total Users" value={stats.total_users} icon={Users} color="text-sky-500"/>
             </div>
+             <div className="break-inside-avoid mb-4">
+                <StatsCard title="New Users (Today)" value={stats.new_users_today} icon={UserPlus} color="text-amber-500" />
+            </div>
             <div className="break-inside-avoid mb-4">
                 <StatsCard title="Total Posts" value={stats.total_posts} icon={FileText} color="text-emerald-500"/>
             </div>
-             <div className="break-inside-avoid mb-4">
-                <StatsCard title="New Users (Week)" value={stats.new_users_week} icon={UserPlus} color="text-amber-500" />
-            </div>
             <div className="break-inside-avoid mb-4">
-                <StatsCard title="New Posts (Week)" value={stats.new_posts_week} icon={FileText} color="text-indigo-500"/>
+                <StatsCard title="New Posts (Week)" value={stats.new_posts_week} icon={TrendingUp} color="text-indigo-500"/>
             </div>
              <div className="break-inside-avoid mb-4">
                 <StatsCard title="Active Today" value={stats.active_today} icon={Activity} color="text-rose-500"/>

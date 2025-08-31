@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import ChangePasswordForm from "@/components/auth/ChangePasswordForm";
 import AvatarUploader from "@/components/core/AvatarUploader";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SettingsPage() {
     const [profile, setProfile] = useState<Profile | null>(null);
@@ -45,6 +46,9 @@ export default function SettingsPage() {
                 first_name: profile.first_name,
                 last_name: profile.last_name,
                 bio: profile.bio,
+                website: profile.website,
+                location: profile.location,
+                visibility: profile.visibility,
             }),
         });
 
@@ -90,6 +94,27 @@ export default function SettingsPage() {
                       <div>
                           <Label htmlFor="bio">Bio</Label>
                           <Textarea id="bio" value={profile.bio || ''} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} className="mt-2" />
+                      </div>
+                      <div>
+                          <Label htmlFor="website">Website</Label>
+                          <Input id="website" value={profile.website || ''} onChange={(e) => setProfile({ ...profile, website: e.target.value })} className="mt-2" />
+                      </div>
+                      <div>
+                          <Label htmlFor="location">Location</Label>
+                          <Input id="location" value={profile.location || ''} onChange={(e) => setProfile({ ...profile, location: e.target.value })} className="mt-2" />
+                      </div>
+                      <div>
+                          <Label htmlFor="visibility">Profile Visibility</Label>
+                          <Select value={profile.visibility || 'public'} onValueChange={(value) => setProfile({ ...profile, visibility: value })}>
+                            <SelectTrigger className="mt-2">
+                                <SelectValue placeholder="Select visibility" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="public">Public</SelectItem>
+                                <SelectItem value="followers_only">Followers Only</SelectItem>
+                                <SelectItem value="private">Private</SelectItem>
+                            </SelectContent>
+                          </Select>
                       </div>
                       <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</Button>
                   </form>

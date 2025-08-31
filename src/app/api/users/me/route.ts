@@ -9,8 +9,15 @@ export async function PATCH(request: Request) {
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
 
-    // Get the updated profile data from the request body
-    const { username, first_name, last_name, bio, website, location } = await request.json();
+    const { 
+        username, 
+        first_name, 
+        last_name, 
+        bio, 
+        website, 
+        location, 
+        visibility 
+    } = await request.json();
 
     const { data, error } = await supabase
         .from('profiles')
@@ -21,6 +28,7 @@ export async function PATCH(request: Request) {
             bio,
             website,
             location,
+            visibility,
             updated_at: new Date().toISOString() 
         })
         .eq('id', user.id)
@@ -28,7 +36,6 @@ export async function PATCH(request: Request) {
         .single();
     
     if (error) {
-        // Handle potential unique constraint violation for username
         if (error.code === '23505') {
              return new NextResponse(JSON.stringify({ error: 'Username is already taken.' }), { status: 409 });
         }
