@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌐 Social Connect
 
-## Getting Started
+A **full-featured social networking platform** built with **Next.js**, **Supabase**, and **TypeScript** — designed to bring people together with real-time interactions, robust security, and a modern, responsive interface.
 
-First, run the development server:
+## 👨‍💻 Author
+
+<p align="center">
+  <b>Sayantan Chakraborty</b><br><br>
+  <a href="https://github.com/Chakraborty-Sayantan">
+    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+  </a>
+  <a href="https://www.linkedin.com/in/sayantan-c12/">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+</p>
+
+---
+
+## ✨ Features
+
+### 👥 User Features
+- 🔐 **Secure Authentication System**
+- 👤 **User Profiles** with customizable avatars
+- 📝 **Create, Edit, and Delete Posts**
+- 🖼️ **Image Upload** support for posts (max 2MB)
+- 👥 **Follow / Unfollow** other users
+- 🔔 **Real-time Notifications**
+- 💬 **Comment** on posts
+- ❤️ **Like / Unlike** posts
+- 🌓 **Light / Dark Theme** support
+- 📱 **Responsive Design** for all devices
+
+### 🛠️ Admin Features
+- 📊 **Admin Dashboard** with statistics
+- 👥 **User Management**
+  - View all users
+  - Modify user roles
+  - Delete users
+- 📝 **Post Management**
+  - Monitor all posts
+  - Remove inappropriate content
+- 📈 **Analytics Overview**
+
+### 🛡️ Security Features
+- 🔒 **Role-Based Access Control**
+- 🛡️ **Protected API Routes**
+- 🔐 **Secure Password Management**
+- 🚫 **Rate Limiting** for sensitive endpoints
+- 🔑 **JWT-Based Authentication**
+- 👮 **Admin-Only Route Protection**
+
+---
+
+## 🧩 Tech Stack
+
+| Layer             | Technology               |
+|-------------------|--------------------------|
+| **Frontend**      | Next.js 15+ (App Router) |
+| **Backend**       | Supabase                 |
+| **Authentication**| Supabase Auth            |
+| **Database**      | PostgreSQL (via Supabase)|
+| **Styling**       | Tailwind CSS             |
+| **UI Components** | shadcn/ui                |
+| **Type Safety**   | TypeScript               |
+
+---
+
+## ⚙️ Setup Guide
+
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/Chakraborty-Sayantan/Social-Connect.git
+cd Social-Connect
+```
+
+
+## ⚙️ Setup Guide
+
+### 2️⃣ Install Dependencies
+
+```bash
+npm install
+```
+### 3️⃣ Environment Setup
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+### 4️⃣ Database Setup
+
+1. Create a new **Supabase project**.
+2. Run the **database migrations**.
+3. Set up **storage buckets** for image uploads.
+
+---
+
+### 5️⃣ Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 6️⃣ Build for Production
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm start
+```
+### 🚀 Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Optimized for Vercel deployment:
 
-## Learn More
+Connect your repository to Vercel.
 
-To learn more about Next.js, take a look at the following resources:
+Configure the environment variables (same as in .env.local).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploy — your app goes live!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+🤝 Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+You're welcome to contribute to SocialConnect!
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Fork the repository
+2. Create your feature branch: git checkout -b feature/awesome-feature
+3. Commit your changes: git commit -m "Add awesome feature"
+4. Push to the branch: git push origin feature/awesome-feature
+5. Open a Pull Request
