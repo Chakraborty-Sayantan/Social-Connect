@@ -7,7 +7,7 @@ export interface Profile {
   last_name: string | null;
   avatar_url: string | null;
   bio: string | null;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   website: string | null;
   location: string | null;
   visibility: string;
@@ -23,29 +23,45 @@ export interface Post {
 }
 
 export interface DetailedNotification {
-    id: number;
-    recipient_id: string;
-    sender_id: string;
-    post_id: number | null;
-    notification_type: 'follow' | 'like' | 'comment';
-    message: string;
-    is_read: boolean;
-    created_at: string;
-    sender_username: string;
-    sender_avatar_url: string | null;
-    post_content: string | null;
+  id: number;
+  recipient_id: string;
+  sender_id: string;
+  post_id: number | null;
+  notification_type: "follow" | "like" | "comment";
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  sender_username: string;
+  sender_avatar_url: string | null;
+  post_content: string | null;
 }
 
 export type AdminPost = {
-    id: number;
-    created_at: string;
-    content: string;
-    is_active: boolean;
-    author: {
-        username: string;
-        avatar_url: string | null;
-    } | null;
+  id: number;
+  created_at: string;
+  content: string;
+  is_active: boolean;
+  author: {
+    username: string;
+    avatar_url: string | null;
+  } | null;
 };
+
+export interface DailyData {
+  day: string;
+  count: number;
+}
+
+export interface AdminStats {
+  total_users: number;
+  total_posts: number;
+  active_today: number;
+  new_users_today: number;
+  new_users_week: number;
+  new_posts_week: number;
+  daily_signups: DailyData[];
+  daily_posts: DailyData[];
+}
 
 export interface AuthenticatedPageProps {
   user: User;
