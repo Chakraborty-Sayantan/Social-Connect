@@ -64,19 +64,29 @@ export default function AuthForm({ mode }: AuthFormProps) {
           router.push('/login');
         }
 
-      } else { // Login mode
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier, password }),
-        });
+      } else { // Login mode - now handled client-side
+        let userEmail = identifier;
         
-        const result = await response.json();
+        // If identifier is not an email, assume it's a username and fetch the email
+        if (!identifier.includes('@')) {
+            const { data, error: rpcError } = await supabase
+                .rpc('get_user_email_by_username', { p_username: identifier });
 
-        if (!response.ok) {
-          throw new Error(result.error || 'An unknown error occurred.');
+            if (rpcError || !data || data.length === 0) {
+                throw new Error("Invalid username or password.");
+            }
+            userEmail = data[0].email;
         }
 
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: userEmail,
+            password,
+        });
+
+        if (signInError) {
+            throw new Error("Invalid username or password.");
+        }
+        
         toast.success('Welcome back!');
         router.push('/feed');
         router.refresh();
