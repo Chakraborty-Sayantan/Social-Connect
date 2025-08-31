@@ -14,14 +14,17 @@ import FollowButton from "./FollowButton";
 import { toast } from "sonner";
 
 interface PostCardProps {
-  post: Post & { likes: { user_id: string }[], _count: { comments: number } };
+  post: Post & {
+    likes: { user_id: string }[];
+    comments: [{ count: number }];
+  };
   currentUser: User | null;
   isFollowingAuthor: boolean;
 }
 
 export default function PostCard({ post, currentUser, isFollowingAuthor }: PostCardProps) {
   const likesArray = post.likes || [];
-  const commentsCount = post._count?.comments || 0;
+  const commentsCount = post.comments?.[0]?.count ?? 0;
 
   const [likeCount, setLikeCount] = useState(likesArray.length);
   const [isLiked, setIsLiked] = useState(likesArray.some(like => like.user_id === currentUser?.id));
