@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PropsWithChildren } from "react";
 
 export default async function AdminLayout({ children }: PropsWithChildren) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
     return (
         <div>
             <header className="bg-gray-800 text-white p-4">
-                <div className="container mx-auto">
+                <div className="container mx-auto flex justify-between items-center">
                     <h1 className="text-xl font-bold">Admin Dashboard</h1>
                      <Link href="/feed" className="text-sm hover:underline">Back to App</Link>
                 </div>

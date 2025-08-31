@@ -1,85 +1,74 @@
-'use client'
+import { createClient } from "@/lib/supabase/server";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DataTable } from "@/components/admin/DataTable";
+import { userColumns } from "@/components/admin/UserColumns";
+import { postColumns } from "@/components/admin/PostColumns";
+import { SupabaseClient } from "@supabase/supabase-js";
+import DashboardClient from "@/components/admin/DashboardClient";
+import { Profile, AdminPost } from "@/lib/types";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-
-interface AdminStats {
-    total_users: number;
-    total_posts: number;
-    active_today: number;
+async function getUsers(supabase: SupabaseClient): Promise<Profile[]> {
+    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    return data ?? [];
 }
-interface UserProfile { id: string; username: string; email: string; is_active: boolean; }
-interface Post { id: number; content: string; author: { username: string }; }
 
-export default function AdminPage() {
-    const [stats, setStats] = useState<AdminStats | null>(null);
-    const [users, setUsers] = useState<UserProfile[]>([]);
-    const [posts, setPosts] = useState<Post[]>([]);
-    const router = useRouter();
+async function getPosts(supabase: SupabaseClient): Promise<AdminPost[]> {
+    // Corrected the query to ensure the author is fetched as a single object.
+    const { data, error } = await supabase
+        .from('posts')
+        .select(`
+            id,
+            created_at,
+            content,
+            is_active,
+            author:profiles!author_id (
+                username,
+                avatar_url
+            )
+        `)
+        .order('created_at', { ascending: false });
 
-    const fetchData = async () => {
-        const [statsRes, usersRes, postsRes] = await Promise.all([
-            fetch('/api/admin/stats'),
-            fetch('/api/admin/users'),
-            fetch('/api/admin/posts')
-        ]);
-        if (statsRes.ok) setStats(await statsRes.json());
-        if (usersRes.ok) setUsers(await usersRes.json());
-        if (postsRes.ok) setPosts(await postsRes.json());
-    };
+    if (error) {
+        console.error("Error fetching posts for admin:", error.message || 'An unknown error occurred');
+        return [];
+    }
+
+    // This handles cases where Supabase might return a single-item array for a to-one join.
+    const formattedData = (data || []).map(post => ({
+        ...post,
+        author: Array.isArray(post.author) ? post.author[0] : post.author,
+    }));
+
+    return formattedData as AdminPost[];
+}
+
+
+export default async function AdminPage() {
+    const supabase = await createClient();
+    const [users, posts] = await Promise.all([
+        getUsers(supabase),
+        getPosts(supabase),
+    ]);
     
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const handleDeletePost = async (postId: number) => {
-        if (confirm("Are you sure you want to delete this post?")) {
-            const res = await fetch(`/api/admin/posts/${postId}`, { method: 'DELETE' });
-            if (res.ok) {
-                toast.success("Post deleted.");
-                fetchData();
-            } else {
-                toast.error("Failed to delete post.");
-            }
-        }
-    };
-
     return (
         <div className="space-y-8">
-            <section className="grid gap-4 md:grid-cols-3">
-                <Card><CardHeader><CardTitle>Total Users</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats?.total_users ?? '...'}</p></CardContent></Card>
-                <Card><CardHeader><CardTitle>Total Posts</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats?.total_posts ?? '...'}</p></CardContent></Card>
-                <Card><CardHeader><CardTitle>Active Today</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats?.active_today ?? '...'}</p></CardContent></Card>
-            </section>
-
-            <section>
-                <h2 className="text-2xl font-semibold mb-4">Users</h2>
-                <div className="bg-white rounded-lg border shadow-sm">
-                    {users.map(user => (
-                        <div key={user.id} className="flex justify-between items-center p-4 border-b">
-                            <div>
-                                <p className="font-semibold">{user.username}</p>
-                                <p className="text-sm text-gray-500">{user.email}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-            
-            <section>
-                <h2 className="text-2xl font-semibold mb-4">Posts</h2>
-                 <div className="bg-white rounded-lg border shadow-sm">
-                    {posts.map(post => (
-                        <div key={post.id} className="flex justify-between items-center p-4 border-b">
-                            <p className="truncate pr-4">{post.content}</p>
-                            <Button variant="destructive" size="sm" onClick={() => handleDeletePost(post.id)}>Delete</Button>
-                        </div>
-                    ))}
-                </div>
-            </section>
+             <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <Tabs defaultValue="overview">
+                <TabsList>
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="users">Users</TabsTrigger>
+                    <TabsTrigger value="posts">Posts</TabsTrigger>
+                </TabsList>
+                <TabsContent value="overview" className="mt-4">
+                     <DashboardClient />
+                </TabsContent>
+                <TabsContent value="users" className="mt-4">
+                    <DataTable columns={userColumns} data={users} />
+                </TabsContent>
+                <TabsContent value="posts" className="mt-4">
+                    <DataTable columns={postColumns} data={posts} />
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

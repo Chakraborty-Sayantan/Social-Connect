@@ -15,19 +15,41 @@ export async function GET() {
     if (!await isAdmin(supabase)) {
         return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
     }
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const { count: total_users } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-    const { count: total_posts } = await supabase.from('posts').select('*', { count: 'exact', head: true });
 
-   // Count users whose last_active_at is greater than or equal to the start of today
-    const { count: active_today } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact', head: true })
-    .gte('last_active_at', today.toISOString());
-
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0,0,0,0);
     
-    const stats = { total_users, total_posts, active_today };
+    const [
+        { count: total_users },
+        { count: total_posts },
+        { count: active_today },
+        { count: new_users_week },
+        { count: new_posts_week }, // Added this new metric
+        dailySignupsRes,
+        dailyPostsRes
+    ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('posts').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active_at', today.toISOString()),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
+        supabase.from('posts').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()), // Query for the new metric
+        supabase.rpc('get_daily_signups'),
+        supabase.rpc('get_daily_posts')
+    ]);
+
+    const stats = {
+        total_users,
+        total_posts,
+        active_today,
+        new_users_week,
+        new_posts_week,
+        daily_signups: dailySignupsRes.data,
+        daily_posts: dailyPostsRes.data
+    };
 
     return NextResponse.json(stats);
 }
