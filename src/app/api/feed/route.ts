@@ -28,7 +28,7 @@ export async function GET() {
       *,
       profiles:author_id(*),
       likes(user_id),
-      comments(count)
+      comments!left(id)
     `)
     .in("author_id", authorIds)
     .order("created_at", { ascending: false })
