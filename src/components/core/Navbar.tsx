@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Cog, LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import NotificationList from './NotificationList';
+import { ThemeToggle } from '../theme-toggle';
 
 interface NavbarProps {
   user: User | null;
@@ -126,18 +127,19 @@ export default function Navbar({ user, profile }: NavbarProps) {
   
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background border-b shadow-sm">
         <div className="container mx-auto px-4">
             <div className="flex justify-between items-center h-14">
-                <Link href="/feed" className="text-xl font-bold text-gray-800 hover:text-gray-900 transition-colors">
+                <Link href="/feed" className="text-xl font-bold">
                     SocialConnect
                 </Link>
 
                 {user && profile && (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <ThemeToggle />
                         <Popover open={isPopoverOpen} onOpenChange={setPopoverOpen}>
                             <PopoverTrigger asChild>
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" size="icon" onClick={() => unreadCount > 0 && handleMarkAllAsRead()}>
                                     <div className="relative">
                                         <Bell className="h-5 w-5" />
                                         {unreadCount > 0 && (

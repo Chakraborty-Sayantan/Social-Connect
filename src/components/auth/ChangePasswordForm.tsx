@@ -31,7 +31,7 @@ export default function ChangePasswordForm() {
     };
 
     return (
-        <form onSubmit={handleChangePassword} className="space-y-4">
+        <form onSubmit={handleChangePassword} className="space-y-6">
             <div>
                 <Label htmlFor="newPassword">New Password</Label>
                 <Input 
@@ -40,6 +40,7 @@ export default function ChangePasswordForm() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter your new password"
+                    className="mt-2"
                 />
             </div>
             <Button type="submit" disabled={loading}>

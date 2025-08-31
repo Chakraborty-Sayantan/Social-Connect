@@ -6,6 +6,7 @@ import StatsCard from "./StatsCard";
 import { UsersChart } from "./UsersChart";
 import { PostsChart } from "./PostsChart";
 import { Skeleton } from "../ui/skeleton";
+import { Users, FileText, Activity, UserPlus } from "lucide-react";
 
 interface DailyData {
     day: string;
@@ -45,7 +46,6 @@ export default function DashboardClient() {
     }, []);
 
     if (loading) {
-        // A simple skeleton loader for a better initial loading experience
         return (
             <div className="columns-1 md:columns-2 lg:columns-3 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -60,22 +60,21 @@ export default function DashboardClient() {
     }
 
     return (
-        // Masonry grid layout using CSS columns
         <div className="columns-1 md:columns-2 gap-4">
             <div className="break-inside-avoid mb-4">
-                <StatsCard title="Total Users" value={stats.total_users} />
+                <StatsCard title="Total Users" value={stats.total_users} icon={Users} color="text-sky-500"/>
             </div>
             <div className="break-inside-avoid mb-4">
-                <StatsCard title="Total Posts" value={stats.total_posts} />
+                <StatsCard title="Total Posts" value={stats.total_posts} icon={FileText} color="text-emerald-500"/>
             </div>
              <div className="break-inside-avoid mb-4">
-                <StatsCard title="New Users (Week)" value={stats.new_users_week} />
+                <StatsCard title="New Users (Week)" value={stats.new_users_week} icon={UserPlus} color="text-amber-500" />
             </div>
             <div className="break-inside-avoid mb-4">
-                <StatsCard title="New Posts (Week)" value={stats.new_posts_week} />
+                <StatsCard title="New Posts (Week)" value={stats.new_posts_week} icon={FileText} color="text-indigo-500"/>
             </div>
              <div className="break-inside-avoid mb-4">
-                <StatsCard title="Active Today" value={stats.active_today} />
+                <StatsCard title="Active Today" value={stats.active_today} icon={Activity} color="text-rose-500"/>
             </div>
 
             <div className="break-inside-avoid mb-4">

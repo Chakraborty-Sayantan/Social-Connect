@@ -1,7 +1,7 @@
 'use client'
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bell, Heart, MessageCircle, UserPlus, } from "lucide-react";
+import { Bell, Heart, MessageCircle, UserPlus  } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { DetailedNotification } from "@/lib/types";

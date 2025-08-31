@@ -64,7 +64,7 @@ export default function SettingsPage() {
         <div className="max-w-2xl mx-auto py-8">
             <h1 className="text-3xl font-bold mb-6">Settings</h1>
             {profile && (
-              <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <div className="bg-card text-card-foreground p-6 rounded-lg border shadow-sm">
                   <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
                   <AvatarUploader 
                       currentAvatarUrl={profile.avatar_url}
@@ -74,28 +74,28 @@ export default function SettingsPage() {
                           router.refresh();
                       }}
                   />
-                  <form onSubmit={handleUpdateProfile} className="space-y-4 mt-6">
+                  <form onSubmit={handleUpdateProfile} className="space-y-6 mt-6">
                       <div>
                           <Label htmlFor="username">Username</Label>
-                          <Input id="username" value={profile.username} onChange={(e) => setProfile({ ...profile, username: e.target.value })} className="mt-1" />
+                          <Input id="username" value={profile.username} onChange={(e) => setProfile({ ...profile, username: e.target.value })} className="mt-2" />
                       </div>
                        <div>
                           <Label htmlFor="firstName">First Name</Label>
-                          <Input id="firstName" value={profile.first_name || ''} onChange={(e) => setProfile({ ...profile, first_name: e.target.value })} className="mt-1" />
+                          <Input id="firstName" value={profile.first_name || ''} onChange={(e) => setProfile({ ...profile, first_name: e.target.value })} className="mt-2" />
                       </div>
                        <div>
                           <Label htmlFor="lastName">Last Name</Label>
-                          <Input id="lastName" value={profile.last_name || ''} onChange={(e) => setProfile({ ...profile, last_name: e.target.value })} className="mt-1" />
+                          <Input id="lastName" value={profile.last_name || ''} onChange={(e) => setProfile({ ...profile, last_name: e.target.value })} className="mt-2" />
                       </div>
                       <div>
                           <Label htmlFor="bio">Bio</Label>
-                          <Textarea id="bio" value={profile.bio || ''} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} className="mt-1" />
+                          <Textarea id="bio" value={profile.bio || ''} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} className="mt-2" />
                       </div>
                       <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</Button>
                   </form>
               </div>
             )}
-            <div className="bg-white p-6 rounded-lg border shadow-sm mt-8">
+            <div className="bg-card text-card-foreground p-6 rounded-lg border shadow-sm mt-8">
                  <h2 className="text-xl font-semibold mb-4">Change Password</h2>
                  <ChangePasswordForm />
             </div>

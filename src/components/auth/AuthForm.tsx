@@ -7,24 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from "sonner";
-import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
 }
 
 export default function AuthForm({ mode }: AuthFormProps) {
-  // State for login form
   const [identifier, setIdentifier] = useState(''); 
-  
-  // State for registration form
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  
-  // Common state
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   
   const router = useRouter();
@@ -36,7 +32,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
     try {
       if (mode === 'register') {
-        // Check if username already exists before registering
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('username')
@@ -138,7 +133,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               minLength={3}
               maxLength={30}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               3-30 characters, letters, numbers, and underscores only
             </p>
           </div>
@@ -171,18 +166,29 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
       <div>
         <Label htmlFor="password">Password</Label>
-        <Input 
-          id="password" 
-          type="password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          placeholder="Enter your password"
-          required 
-          className='mt-1'
-          minLength={6}
-        />
+        <div className="relative mt-1">
+            <Input 
+                id="password" 
+                type={showPassword ? 'text' : 'password'} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="Enter your password"
+                required 
+                minLength={6}
+                className="pr-10"
+            />
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute inset-y-0 right-0 h-full px-3"
+                onClick={() => setShowPassword(!showPassword)}
+            >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </Button>
+        </div>
         {mode === 'register' && (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Minimum 6 characters
           </p>
         )}
@@ -191,15 +197,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
       <Button type="submit" disabled={loading} className="w-full !mt-6">
         {loading ? 'Processing...' : (mode === 'login' ? 'Sign In' : 'Sign Up')}
       </Button>
-      
-     {/*  {mode === 'login' && (
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Don&apos;t have an account?{' '}
-          <Button variant="link" className="p-0 h-auto font-medium text-indigo-600 hover:text-indigo-500" asChild>
-            <Link href="/register">Sign up here</Link>
-          </Button>
-        </p>
-      )} */}
     </form>
   );
 }

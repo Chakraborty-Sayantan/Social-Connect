@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ export default function CommentSection({ postId }: { postId: number }) {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    const fetchComments = async () => {
+    const fetchComments = useCallback(async () => {
         setLoading(true);
         const res = await fetch(`/api/posts/${postId}/comments`);
         if (res.ok) {
@@ -32,11 +32,11 @@ export default function CommentSection({ postId }: { postId: number }) {
             setComments(data);
         }
         setLoading(false);
-    };
+    }, [postId]);
 
     useEffect(() => {
         fetchComments();
-    }, [postId]);
+    }, [fetchComments]);
 
     const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -84,7 +84,7 @@ export default function CommentSection({ postId }: { postId: number }) {
                                 <AvatarImage src={comment.profiles.avatar_url || undefined} />
                                 <AvatarFallback>{comment.profiles.username.charAt(0).toUpperCase()}</AvatarFallback>
                             </Avatar>
-                            <div className="bg-gray-100 rounded-lg p-3 w-full">
+                            <div className="bg-muted rounded-lg p-3 w-full">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-sm">{comment.profiles.username}</span>
                                     <time className="text-xs text-muted-foreground">

@@ -21,7 +21,7 @@ export default async function MainLayout({
     .single();
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       <Navbar user={user} profile={profile} />
       <main className="container mx-auto pt-16 px-4">
         {children}

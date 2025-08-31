@@ -102,12 +102,12 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg border shadow-sm">
+    <div className="p-4 bg-card rounded-lg border shadow-sm">
       <Textarea
         placeholder="What's on your mind?"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="min-h-[100px] border-0 focus-visible:ring-0 ring-offset-0"
+        className="min-h-[100px] border-0 focus-visible:ring-0 ring-offset-0 bg-transparent"
       />
       {previewUrl && (
             <Image
