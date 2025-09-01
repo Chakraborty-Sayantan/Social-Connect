@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server-service";
 import { NextRequest, NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -72,10 +72,7 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const { error } = await supabase
-    .from("posts")
-    .update({ is_active: false, updated_at: new Date().toISOString() })
-    .eq("id", Number(id));
+  const { error } = await supabase.auth.admin.deleteUser(id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -17,6 +17,7 @@ export default async function FeedPage() {
       likes(user_id),
       comments!left(id)
     `)
+    .eq("is_active", true) // This line ensures only active posts are fetched
     .order("created_at", { ascending: false })
     .limit(20);
 

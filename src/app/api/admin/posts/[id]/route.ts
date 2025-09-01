@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server-service";
 import { NextRequest, NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -15,14 +15,14 @@ async function isAdmin(supabase: SupabaseClient) {
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }   
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = await createClient();
   if (!(await isAdmin(supabase))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = await params;                     
+  const { id } = await params;
   const { error } = await supabase
     .from("posts")
     .update({ is_active: false, updated_at: new Date().toISOString() })

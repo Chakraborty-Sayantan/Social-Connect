@@ -30,6 +30,20 @@ export function UserActions({ user }: { user: Profile }) {
         }
     }
 
+    const handleDelete = async () => {
+        if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+             const res = await fetch(`/api/admin/users/${user.id}`, {
+                method: 'DELETE',
+            });
+            if (res.ok) {
+                toast.success("User deleted");
+                router.refresh();
+            } else {
+                toast.error("Failed to delete user");
+            }
+        }
+    }
+
     return (
         <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -42,8 +56,8 @@ export function UserActions({ user }: { user: Profile }) {
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => handleRoleChange('admin')}>Make Admin</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleRoleChange('user')}>Make User</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete} className="text-red-500">Delete User</DropdownMenuItem>
         </DropdownMenuContent>
         </DropdownMenu>
     )
 }
-
