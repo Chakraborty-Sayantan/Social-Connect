@@ -62,17 +62,28 @@ export interface CategoryData {
     count: number;
 }
 
+export interface DayOfWeekData {
+  day_of_week: string;
+  count: number;
+}
+
+export interface HourData {
+  hour_of_day: string;
+  count: number;
+}
+
 export interface AdminStats {
   total_users: number;
   total_posts: number;
   active_today: number;
-  new_users_today: number;
   new_users_week: number;
   new_posts_week: number;
   daily_signups: DailyData[];
   daily_posts: DailyData[];
   role_distribution: RoleData[];
   posts_by_category: CategoryData[];
+  signups_by_day_of_week: DayOfWeekData[];
+  posts_by_hour: HourData[];
 }
 
 export interface AuthenticatedPageProps {
