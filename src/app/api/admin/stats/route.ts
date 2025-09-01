@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server-service";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
@@ -32,16 +32,20 @@ export async function GET() {
         { count: new_users_week },
         { count: new_posts_week },
         dailySignupsRes,
-        dailyPostsRes
+        dailyPostsRes,
+        roleDistributionRes,
+        postsByCategoryRes,
     ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('posts').select('*', { count: 'exact', head: true }),
+        supabase.from('posts').select('*', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active_at', today.toISOString()),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
         supabase.from('posts').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
         supabase.rpc('get_daily_signups'),
-        supabase.rpc('get_daily_posts')
+        supabase.rpc('get_daily_posts'),
+        supabase.rpc('get_user_role_distribution'),
+        supabase.rpc('get_posts_per_category')
     ]);
 
     const stats = {
@@ -52,7 +56,9 @@ export async function GET() {
         new_users_week,
         new_posts_week,
         daily_signups: dailySignupsRes.data,
-        daily_posts: dailyPostsRes.data
+        daily_posts: dailyPostsRes.data,
+        role_distribution: roleDistributionRes.data,
+        posts_by_category: postsByCategoryRes.data,
     };
 
     return NextResponse.json(stats);

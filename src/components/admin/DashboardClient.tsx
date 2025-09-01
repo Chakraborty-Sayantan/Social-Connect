@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatsCard from "./StatsCard";
 import { UsersChart } from "./UsersChart";
 import { PostsChart } from "./PostsChart";
+import { RoleDistributionChart } from "./RoleDistributionChart";
+import { PostsByCategoryChart } from "./PostsByCategoryChart";
 import {
   Users,
   FileText,
@@ -65,6 +67,28 @@ export default function DashboardClient({ initialStats }: { initialStats: AdminS
           </CardHeader>
           <CardContent>
             <PostsChart data={initialStats.daily_posts} />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="sm:col-span-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Roles</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RoleDistributionChart data={initialStats.role_distribution} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="sm:col-span-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Posts by Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PostsByCategoryChart data={initialStats.posts_by_category} />
           </CardContent>
         </Card>
       </div>

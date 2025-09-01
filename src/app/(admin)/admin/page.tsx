@@ -27,9 +27,11 @@ async function getStats(): Promise<AdminStats> {
     { count: new_posts_week },
     { data: daily_signups },
     { data: daily_posts },
+    { data: role_distribution },
+    { data: posts_by_category },
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("posts").select("*", { count: "exact", head: true }),
+    supabase.from("posts").select("*", { count: "exact", head: true }).eq("is_active", true),
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
@@ -48,6 +50,8 @@ async function getStats(): Promise<AdminStats> {
       .gte("created_at", sevenDaysAgo.toISOString()),
     supabase.rpc("get_daily_signups"),
     supabase.rpc("get_daily_posts"),
+    supabase.rpc('get_user_role_distribution'),
+    supabase.rpc('get_posts_per_category'),
   ]);
 
   return {
@@ -59,6 +63,8 @@ async function getStats(): Promise<AdminStats> {
     new_posts_week: new_posts_week ?? 0,
     daily_signups: daily_signups ?? [],
     daily_posts: daily_posts ?? [],
+    role_distribution: role_distribution ?? [],
+    posts_by_category: posts_by_category ?? [],
   };
 }
 
@@ -119,11 +125,11 @@ export default async function AdminPage() {
         </TabsContent>
 
         <TabsContent value="users" className="mt-4">
-          <DataTable columns={userColumns} data={users} />
+          <DataTable columns={userColumns} data={users} searchKey="username"/>
         </TabsContent>
 
         <TabsContent value="posts" className="mt-4">
-          <DataTable columns={postColumns} data={posts} />
+          <DataTable columns={postColumns} data={posts} searchKey="content"/>
         </TabsContent>
       </Tabs>
     </div>

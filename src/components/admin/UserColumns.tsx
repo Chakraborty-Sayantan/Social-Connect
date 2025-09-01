@@ -38,7 +38,10 @@ export const userColumns: ColumnDef<Profile>[] = [
     cell: ({ row }) => {
         const role = row.getValue("role") as string
         return <Badge variant={role === 'admin' ? 'default' : 'secondary'}>{role}</Badge>
-    }
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
   },
   {
     id: "actions",

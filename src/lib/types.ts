@@ -52,6 +52,16 @@ export interface DailyData {
   count: number;
 }
 
+export interface RoleData {
+    role: string;
+    count: number;
+}
+
+export interface CategoryData {
+    category: string;
+    count: number;
+}
+
 export interface AdminStats {
   total_users: number;
   total_posts: number;
@@ -61,6 +71,8 @@ export interface AdminStats {
   new_posts_week: number;
   daily_signups: DailyData[];
   daily_posts: DailyData[];
+  role_distribution: RoleData[];
+  posts_by_category: CategoryData[];
 }
 
 export interface AuthenticatedPageProps {
