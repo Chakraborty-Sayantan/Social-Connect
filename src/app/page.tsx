@@ -18,7 +18,7 @@ export default function HomePage() {
             priority
             className="rounded-full object-cover"
         />
-        <h1 className="text-4xl font-bold tracking-tight text-foreground mt-6">
+        <h1 className="text-6xl font-bold tracking-tight text-foreground mt-6">
           Welcome to Social Connect
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
